@@ -1,0 +1,90 @@
+import pandas as pd
+import csv
+import matplotlib.pyplot as plt
+import os
+
+# groupのところだけ変える。
+group = 0
+game_count = 0
+
+txt_path = list()
+csv_path = list()
+my_card = list()
+your_bet = list()
+
+def main():
+    dir_ex_check()
+    get_group_and_gamecount()
+    path_setup()
+    txt_to_csv()
+    csv_reader()
+    mk_graph()
+
+
+def dir_ex_check():
+    if(os.path.isdir('C:/Users/m2002/Programs/Python/soseijikken/png') == False):
+        os.mkdir('C:/Users/m2002/Programs/Python/soseijikken/png')
+    if(os.path.isdir('C:/Users/m2002/Programs/Python/soseijikken/csv') == False):
+        os.mkdir('C:/Users/m2002/Programs/Python/soseijikken/csv')
+
+
+def get_group_and_gamecount():
+    global group, game_count
+    while(1):
+        group = int(input('相手のグループ番号は？半角数字で入力してください。'))
+        if(os.path.isfile(f'C:/Users/m2002/Programs/Python/soseijikken/txt/log{group}-1.txt') == False):
+            print('ファイルがありません。もう一度入力してください。\n')
+
+        game_count = int(input('ゲーム回数は何回？半角数字で入力してください。'))
+        if(os.path.isfile(f'C:/Users/m2002/Programs/Python/soseijikken/txt/log{group}-{game_count}.txt') == False):
+            print('そんなにゲームをしていません。もう一度入力してください。\n')
+        else:
+            break
+
+
+def path_setup():
+    global group, txt_path, csv_path, game_count
+    for i in range(game_count):
+        txt_path.append(
+            f'C:/Users/m2002/Programs/Python/soseijikken/txt/log{group}-{i+1}.txt')
+        csv_path.append(
+            f'C:/Users/m2002/Programs/Python/soseijikken/csv/log{group}-{i+1}.csv')
+
+
+def txt_to_csv():
+    global txt_path, csv_path, game_count
+    read_text_file = list()
+    for i in range(game_count):
+        if(os.path.isfile(csv_path[i]) == False):
+            read_text_file.append(pd.read_csv(txt_path[i]))
+            read_text_file[i].to_csv(csv_path[i], index=False)
+
+
+def csv_reader():
+    global csv_path, my_card, your_bet, int_my_card, int_your_bet, game_count
+    f = list()
+    for i in range(game_count):
+        f = open(csv_path[i], 'r')
+        reader = csv.reader(f)
+        for row in reader:
+            # indexありでcsvファイルにするとrow[0]はindexになる。だから30行目で、indexなしで保存した。
+            my_card.append(float(row[3]))
+            your_bet.append(float(row[4]))
+
+
+def mk_graph():
+    global my_card, your_bet, group, game_count
+    x = my_card
+    y = your_bet
+    fig = plt.figure()
+    plt.scatter(x, y, s=100, alpha=0.2)
+    plt.title(f'group-{group}')
+    plt.xlabel('my_card')
+    plt.ylabel('your_bet')
+    plt.show()
+
+    fig.savefig(f'C:/Users/m2002/Programs/Python/soseijikken/png/your{group}.png')
+
+
+if __name__ == '__main__':
+    main()
